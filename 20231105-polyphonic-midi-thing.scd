@@ -1,9 +1,3 @@
-// hello world
-s.boot; // ctrl + b
-s.plotTree;
-
-MIDIClient.init;
-MIDIIn.connectAll;
 
 (
 SynthDef.new(
@@ -23,6 +17,13 @@ SynthDef.new(
 	).add;
 )
 
+// ------------------------------------------------------------------------------------------------
+// Midi interface
+// ------------------------------------------------------------------------------------------------
+
+MIDIClient.init;
+MIDIIn.connectAll;
+
 ~notes = Array.newClear(128);
 
 (
@@ -41,6 +42,19 @@ MIDIdef.noteOff(\kb_off, {
 	arg vel, num, chan, src;
 	["note off:",vel, num].postln;
 	~notes[num].set(\gate, 0);
-	~notes[num] = nil; // server side should does not garbage dispose if we loose the refs
+
+	// server side should does not garbage dispose if we loose the refs
+	// unless doneaction:2 is used.
+	~notes[num] = nil;
 });
 )
+
+(
+MIDIdef.cc(\kb_cc, {
+	    arg vel, num, chan, src;
+	[vel, num, chan, src].postln
+	}
+);
+)
+
+MIDIdef.freeAll;
